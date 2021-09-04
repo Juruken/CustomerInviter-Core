@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using CustomerInvite.Api.Service.Tests.HttpHelpers;
 using CustomerInviter.Core.Models;
-using Nancy;
-using Nancy.Testing;
 using Shouldly;
 using TestStack.BDDfy;
 using TestStack.BDDfy.Xunit;
@@ -14,11 +14,10 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
 
     public class GetCustomersByDistanceScenario : ApiScenario
     {
-        private BrowserResponse _response;
+        private ResponseWrapper _response;
         
         public GetCustomersByDistanceScenario(ITestOutputHelper output) : base(output)
         {
-            Output = output;
         }
 
         public async Task GivenMultipleCustomers()
@@ -48,7 +47,7 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
                 }
             };
 
-            await Browser.Put("/customers", with =>
+            await Client.Put("/customer", with =>
             {
                 with.JsonBody(customers);
             });
@@ -56,7 +55,7 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
 
         public async Task WhenFetchingCustomersInDistance()
         {
-            _response = await Browser.Get($"/customers/distance/{100}");
+            _response = await Client.Get($"/customer/distance/{100}");
         }
 
         public void ThenTheResponseShouldBeOK()
@@ -66,7 +65,7 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
 
         public void AndThenTheResponseShouldBeOnlyTwoCustomersInRange()
         {
-            var result = _response.Body.DeserializeJson<List<CustomerModel>>();
+            var result = _response.DeserializeJson<List<CustomerModel>>();
 
             result.ShouldNotBeNull();
             result.ShouldNotBeEmpty();
@@ -75,7 +74,7 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
 
         public void AndThenTheResultsShouldBeSorted()
         {
-            var result = _response.Body.DeserializeJson<List<CustomerModel>>();
+            var result = _response.DeserializeJson<List<CustomerModel>>();
             var customer = result.FirstOrDefault();
             customer.Latitude.ShouldBe("52.986375");
             customer.Longitude.ShouldBe("-6.043701");

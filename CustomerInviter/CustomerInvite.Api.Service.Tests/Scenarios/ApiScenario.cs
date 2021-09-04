@@ -1,5 +1,7 @@
-﻿using Autofac;
-using Nancy.Testing;
+﻿using System.Net.Http;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using CustomerInvite.Api.Service.Tests.HttpHelpers;
 using Serilog;
 using Xunit.Abstractions;
 
@@ -7,7 +9,7 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
 {
     public abstract class ApiScenario
     {
-        protected Browser Browser;
+        protected ClientWrapper Client;
         protected ITestOutputHelper Output;
         protected ILifetimeScope Scope;
 
@@ -20,9 +22,11 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
         {
             ConfigureLogging(Output);
 
-            var bootstrapper = new TestableBootstrapper();
-            Scope = bootstrapper.Scope;
-            Browser = new Browser(bootstrapper, context => context.Header("Accept", "application/json"));
+            var testFactory = new TestWebApplicationFactory();
+            var autofacServiceProvider = testFactory.Services as AutofacServiceProvider;
+            Scope = autofacServiceProvider.LifetimeScope;
+
+            Client = new ClientWrapper(testFactory.CreateClient());
         }
 
         /// <summary>
@@ -30,7 +34,7 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
         /// </summary>
         public virtual void TearDown()
         {
-            
+            Scope.Disposer.Dispose();
         }
 
         private static void ConfigureLogging(ITestOutputHelper output)

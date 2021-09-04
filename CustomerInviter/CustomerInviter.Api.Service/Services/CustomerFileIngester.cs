@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CustomerInviter.Core.Models;
 using FluentValidation;
-using Nancy;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -26,18 +26,14 @@ namespace CustomerInviter.Api.Service.Services
             _validator = validator;
         }
 
-        public async Task<IEnumerable<Customer>> Ingest(Request request)
+        public async Task<IEnumerable<Customer>> Ingest(IFormFileCollection files)
         {
-            if (!request.Files.Any()) return null;
-
-            if (request.Files.Any(f => f.ContentType != "application/text")) return null;
-
             var customers = new List<Customer>();
 
-            foreach (var file in request.Files.ToList())
+            foreach (var file in files.ToList())
             {
                 var count = 0;
-                using (var stream = new StreamReader(file.Value))
+                using (var stream = new StreamReader(file.OpenReadStream()))
                 {
                     while (!stream.EndOfStream)
                     {

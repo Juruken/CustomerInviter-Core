@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
+using CustomerInvite.Api.Service.Tests.HttpHelpers;
 using CustomerInviter.Core.Models;
-using Nancy;
-using Nancy.Testing;
 using Shouldly;
 using TestStack.BDDfy;
 using TestStack.BDDfy.Xunit;
@@ -13,12 +13,12 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
 
     public class CreateCustomersScenario : ApiScenario
     {
-        private BrowserResponse _response;
+        private ResponseWrapper _response;
         private List<dynamic> _model;
         
         public CreateCustomersScenario(ITestOutputHelper output) : base(output)
         {
-            Output = output;
+            
         }
 
         public void GivenACustomerToCreate()
@@ -44,10 +44,7 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
 
         public async Task WhenCreatingTheCustomer()
         {
-            _response = await Browser.Put("/customers", with =>
-            {
-                with.JsonBody(_model);
-            });
+            _response = await Client.Put("/customer", with => with.JsonBody(_model));
         }
 
         public void ThenTheResponseShouldBeAccepted()

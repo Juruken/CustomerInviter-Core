@@ -1,8 +1,9 @@
 ﻿using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
-using Nancy;
-using Nancy.Testing;
+using CustomerInvite.Api.Service.Tests.HttpHelpers;
+using NUnit.Framework;
 using Shouldly;
 using TestStack.BDDfy;
 using TestStack.BDDfy.Xunit;
@@ -13,7 +14,7 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
 
     public class UploadCustomerFileScenario : ApiScenario
     {
-        private BrowserResponse _response;
+        private ResponseWrapper _response;
         private Stream _fileStream;
         
         public UploadCustomerFileScenario(ITestOutputHelper output) : base(output)
@@ -29,10 +30,9 @@ namespace CustomerInvite.Api.Service.Tests.Scenarios
 
         public async Task WhenUploadingTheCustomerFile()
         {
-            _response = await Browser.Put("/customers/import", with =>
+            _response = await Client.Put("/customer/import", with =>
             {
-                with.MultiPartFormData(new BrowserContextMultipartFormData(m => 
-                    m.AddFile("customers", "customers.txt", "application/text",_fileStream)));
+                with.File("customers", "customers.txt", "application/text",_fileStream);
             });
         }
 
